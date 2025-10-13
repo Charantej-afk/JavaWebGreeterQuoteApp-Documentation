@@ -1,0 +1,118 @@
+📘 Document Overview — *02-Java Web Greeter and Quote App (Tomcat).docx*
+
+This document explains the **complete build and deployment process** for a **Java Web Greeter and Quote App**, deployed on **two AWS EC2 servers** — one for **building with Maven** and another for **deployment on Tomcat**.
+
+---
+
+### 🧩 What’s Inside the Document
+
+#### 1️⃣ Overview
+
+A simple **Java web application** that:
+
+* Greets the user with their name.
+* Displays a **random motivational quote**.
+  The application uses **Maven** and **Tomcat** in a **two-server architecture** hosted on **AWS EC2**.
+
+#### 2️⃣ Tech Stack
+
+* **Language:** Java (JDK 17)
+* **Build Tool:** Maven
+* **Server:** Apache Tomcat
+* **Deployment Model:**
+
+  ```
+  +----------------+           +----------------+
+  |  Build Server  |  ----->   |  Deploy Server |
+  | (Maven Build)  |           |   (Tomcat)     |
+  +----------------+           +----------------+
+  ```
+
+#### 3️⃣ Prerequisites
+
+* Java JDK 17 installed on both servers
+* Maven installed on Build Server
+* Tomcat installed on Deploy Server
+* Both servers in the same VPC (for internal SCP transfers)
+
+#### 4️⃣ Server Setup
+
+* **Build Server:** Ubuntu 24.04 LTS EC2 (t3.micro) with SSH access
+* **Deploy Server:** Ubuntu 24.04 LTS EC2 (t3.micro) with SSH (22) and Tomcat (8080) access
+* Key pairs: `Build-Key.pem` and `Deploy-Key.pem`
+
+#### 5️⃣ Software Installation
+
+* Update packages and install Java 17 on both servers
+* Install **Maven** on Build Server
+* Download and extract **Tomcat** on Deploy Server using `wget`
+
+#### 6️⃣ Build Process
+
+* Clone the app repository:
+
+  ```bash
+  git clone <repository-url>
+  cd JavaWebGreeterQuoteApp
+  ```
+* Validate and package the app using Maven:
+
+  ```bash
+  mvn validate
+  mvn package
+  ```
+* Modify `pom.xml` if older versions cause build errors
+* Final `.war` file is generated in the `target/` directory after a successful build
+
+#### 7️⃣ Deployment Process
+
+* Start Tomcat using:
+
+  ```bash
+  ./startup.sh
+  ```
+* Edit and configure Tomcat files for deployment access:
+
+  * `context.xml` (remove access restrictions)
+  * `tomcat-users.xml` (add username and password)
+* Access Tomcat via:
+
+  ```
+  http://<Deploy-Server-Public-IP>:8080
+  ```
+
+#### 8️⃣ WAR File Transfer
+
+* Copy the Deploy Server’s `.pem` key to the Build Server
+* Transfer the `.war` file securely using:
+
+  ```bash
+  scp -i ~/Deploy-Key.pem ~/JavaWebGreeterQuoteApp/target/*.war ubuntu@<Deploy-Server-Private-IP>:~/apache-tomcat-9.0.110/webapps/
+  ```
+* Restart Tomcat:
+
+  ```bash
+  ./shutdown.sh
+  ./startup.sh
+  ```
+
+#### 9️⃣ Verification
+
+* Check the deployed application in Tomcat’s **Applications Table**
+* Access the live app in a browser:
+
+  ```
+  http://<Deploy-Server-Public-IP>:8080/JavaWebGreeterQuoteApp
+  ```
+* The page should greet you by name and show a random motivational quote.
+
+---
+
+### 🏁 Conclusion
+
+This project demonstrates:
+✅ End-to-end Java web application deployment using Maven and Tomcat
+✅ Multi-server architecture for build and deployment separation
+✅ Secure WAR file transfer between EC2 instances
+✅ Practical DevOps workflow for Java web apps
+
